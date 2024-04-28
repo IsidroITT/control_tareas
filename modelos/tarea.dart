@@ -13,7 +13,6 @@ class Tarea{
 
   Map<String, dynamic> toJSON(){
     return {
-      "idtarea": IdTarea,
       "idmateria": IdMateria,
       "f_entrega": F_Entrega,
       "descripcion": Descripcion
