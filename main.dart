@@ -1,3 +1,4 @@
+import 'package:control_tareas/materia/ventanaMaterias.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -35,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Homework List",
+        title: Text("Control tareas",
           style: TextStyle(
             color: Colors.white,
             fontSize: 28
@@ -44,7 +45,6 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true,
         backgroundColor: Colors.deepPurpleAccent,
       ),
-      body: dinamico(),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           // ya tu sabe xd
@@ -58,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
             DrawerHeader(child: Column()),
             itemDrawer(1, Icons.book, "Materias"),
             itemDrawer(2, Icons.edit, "Tareas"),
+            itemDrawer(3, Icons.book, "Materias"),
           ],
         ),
       ),
@@ -66,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget dinamico(){
     switch(_indice){
-      case 1: return ListView();
+      case 1: return ventanaMaterias();
       case 2: return ListView();
       case 3: return ListView();
       default: return ListView();
@@ -79,7 +80,11 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           _indice = i;
         });
-        Navigator.pop(context);
+        // Enlace con las paginas de la aplicacion
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => dinamico())
+        );
       },
       title: Row(
         children: [

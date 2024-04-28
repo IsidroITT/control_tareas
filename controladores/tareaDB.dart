@@ -1,38 +1,51 @@
-import 'package:flutter/cupertino.dart';
+import 'package:control_tareas/modelos/tarea.dart';
+import 'package:control_tareas/modelos/tareaMateria.dart';
 
 import '/controladores/conexionDB.dart';
 import 'package:sqflite/sqflite.dart';
-import '../modelos/materia.dart';
 
-class DBMateria {
-  static Future<int> insertar(Materia m) async{
+class DBTarea {
+  static Future<int> insertar(Tarea t) async{
     Database base = await Conexion.abrirDB();
-    return base.insert("MATERIA", m.toJSON(), conflictAlgorithm: ConflictAlgorithm.fail);
+    return base.insert("TAREA", t.toJSON(), conflictAlgorithm: ConflictAlgorithm.fail);
   }
 
-  static Future<int> eliminar(Materia m) async{
+  static Future<int> eliminar(Tarea t) async{
     Database base = await Conexion.abrirDB();
-    return base.delete("MATERIA", where: "IDMATERIA=?", whereArgs: [m.IdMateria]);
+    return base.delete("TAREA", where: "IDTAREA=?", whereArgs: [t.IdTarea]);
   }
 
-  static Future<List<Materia>> consultar() async{
+  static Future<List<TareaMateria>> consultar() async{
     Database base = await Conexion.abrirDB();
-    List<Map<String, dynamic>> r = await base.query("MATERIA");
+    List<Map<String, dynamic>> r = await base.query(
+        "TAREA INNER JOIN MATERIA ON TAREA.IDMATERIA = MATERIA.IDMATERIA",
+        columns: [
+          "TAREA.IDTAREA",
+          "TAREA.IDMATERIA"
+          "TAREA.F_ENTREGA",
+          "TAREA.DESCRIPCION",
+          "MATERIA.NOMBRE",
+          "MATERIA.SEMESTRE",
+          "MATERIA.DOCENTE"
+        ]);
 
     return List.generate(
         r.length,
         (index){
-          return Materia(
-              IdMateria: r[index]["IDMATERIA"],
-              Nombre:  r[index]["NOMBRE"],
-              Semestre:  r[index]["SEMESTRE"],
-              Docente:  r[index]["DOCENTE"]
+          return TareaMateria(
+              IdTarea: r[index]["IDTAREA"],
+              IdMateira: r[index]["IDMATERIA"],
+              F_Entrega:r[index]["F_ENTREGA"],
+              Descripcion: r[index]["DESCRIPCION"],
+              NombreMateria: r[index]["NOMBRE"],
+              SemestreMateria: r[index]["SEMESTRE"],
+              DocenteMateria: r[index]["DOCENTE"]
           );
         });
   }
 
-  static Future<int> actualizar(Materia m, int i) async{
+  static Future<int> actualizar(Tarea t, int i) async{
     Database base = await Conexion.abrirDB();
-    return base.update("MATERIA", m.toJSON(), where: "IDMATERIA=?", whereArgs: [i]);
+    return base.update("TAREA", t.toJSON(), where: "IDTAREA=?", whereArgs: [i]);
   }
 }
