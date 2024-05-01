@@ -4,6 +4,7 @@ import 'package:control_tareas/modelos/tarea.dart';
 import 'package:control_tareas/tarea/agregarTarea.dart';
 import 'package:control_tareas/tarea/listarTareas.dart';
 
+import '/tarea/ventanaTareas.dart';
 import '/materia/ventanaMaterias.dart';
 import 'package:flutter/material.dart';
 
@@ -94,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget dinamico(){
     switch(_indice){
       case 1: return ventanaMaterias();
-      case 2: return listarTareas();
+      case 2: return VentanaTareas();
       default: return ListView();
     }
   }
