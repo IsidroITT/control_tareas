@@ -34,7 +34,7 @@ class _AgregarTareaState extends State<AgregarTarea> {
      padding: const EdgeInsets.all(50),
      children: [
        //region componentes para capturar la info
-       DropdownButtonFormField(
+      DropdownButtonFormField(
           decoration: const InputDecoration(
             labelText: 'Materia:',
             icon: Icon(Icons.book),
@@ -116,7 +116,7 @@ class _AgregarTareaState extends State<AgregarTarea> {
       context: context,
       firstDate: DateTime(2020),
       initialDate: DateTime.now(),
-      lastDate: DateTime.now(),
+      lastDate: DateTime(2099),
     );
 
     if (fechaSelecionada != null){

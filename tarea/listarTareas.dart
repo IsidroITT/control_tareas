@@ -1,6 +1,9 @@
 import 'package:control_tareas/controladores/materiaDB.dart';
 import 'package:flutter/material.dart';
 import '../modelos/materia.dart';
+import '../modelos/tareaMateria.dart';
+import '../modelos/tarea.dart';
+import '../controladores/tareaDB.dart';
 
 class listarTareas extends StatefulWidget {
   const listarTareas({super.key});
@@ -11,45 +14,51 @@ class listarTareas extends StatefulWidget {
 
 class _listarTareasState extends State<listarTareas> {
   List<Materia> listaMaterias = [];
+  List<TareaMateria> listaTareas = [];
 
-  // Controladores de texto
-  final idmateriaController = TextEditingController();
-  final nombreController = TextEditingController();
-  final semestreController = TextEditingController();
-  final docenteController = TextEditingController();
+  //region variables de diseño
+  String idMateriaFK = '';
+  final fechaDriver = TextEditingController();
+  final descripcionDriver = TextEditingController();
+  //endregion
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    cargarMaterias();
+    cargarDatos();
   }
 
-  void cargarMaterias() async{
+  void cargarDatos() async{
     List<Materia> lm = await DBMateria.consultar();
+    List<TareaMateria> lt = await DBTarea.consultar();
     setState(() {
+      listaTareas = lt;
       listaMaterias = lm;
+      if (listaMaterias.isNotEmpty) {
+        idMateriaFK = listaMaterias.first.IdMateria;
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        padding: EdgeInsets.all(20),
-        itemCount: listaMaterias.length,
+        padding: const EdgeInsets.all(20),
+        itemCount: listaTareas.length,
         itemBuilder: (context, index){
           return ListTile(
-            title: Text(listaMaterias[index].Nombre),
-            subtitle: Text("${listaMaterias[index].Docente} - ${listaMaterias[index].Semestre}"),
+            title: Text('${listaTareas[index].IdTarea}'),
+            subtitle: Text("${listaTareas[index].Descripcion} \n ${listaTareas[index].F_Entrega}"),
             trailing: IconButton(onPressed: (){
               botonEliminar(index);
-            }, icon: Icon(Icons.delete)),
+            }, icon: const Icon(Icons.delete)),
             onTap: (){
-              nombreController.text = listaMaterias[index].Nombre;
-              semestreController.text = listaMaterias[index].Semestre;
-              docenteController.text = listaMaterias[index].Docente;
-
-              ventanaActualizar(listaMaterias[index].IdMateria);
+              idMateriaFK = listaTareas[index].IdMateira;
+              fechaDriver.text = listaTareas[index].F_Entrega;
+              descripcionDriver.text = listaTareas[index].Descripcion;
+              ventanaActualizar(listaTareas[index].IdTarea);
             },
           );
         }
@@ -61,31 +70,31 @@ class _listarTareasState extends State<listarTareas> {
         context: context,
         builder: (BuildContext context){
           return AlertDialog(
-            icon: Icon(
+            icon: const Icon(
               Icons.warning,
               color: Colors.white,
             ),
             backgroundColor: Colors.redAccent,
-            title: Text("Cuidado!",
+            title: const Text("Cuidado!",
               style: TextStyle(
                   color: Colors.white
               ),
             ),
-            content: Text("Estas seguro que deseas eliminar este elemento (${listaMaterias[index].Nombre} - ${listaMaterias[index].Docente})",
-              style: TextStyle(
+            content: Text("Estas seguro que deseas eliminar este elemento (${listaTareas[index].IdTarea}: ${listaTareas[index].Descripcion})",
+              style: const TextStyle(
                   color: Colors.white
               ),
             ),
             actions: [
               TextButton(
                   onPressed: (){
-                    DBMateria.eliminar(listaMaterias[index].IdMateria);
+                    DBTarea.eliminar(listaTareas[index].IdTarea);
                     setState(() {
-                      cargarMaterias();
+                      cargarDatos();
                     });
                     Navigator.pop(context);
                   },
-                  child: Text("Eliminar",
+                  child: const Text("Eliminar",
                     style: TextStyle(
                         color: Colors.white
                     ),
@@ -95,7 +104,7 @@ class _listarTareasState extends State<listarTareas> {
                   onPressed: (){
                     Navigator.pop(context);
                   },
-                  child: Text("Cancelar",
+                  child: const Text("Cancelar",
                     style: TextStyle(
                         color: Colors.white
                     ),
@@ -107,7 +116,7 @@ class _listarTareasState extends State<listarTareas> {
     );
   }
 
-  void ventanaActualizar(String index) {
+  void ventanaActualizar(int index) {
     showModalBottomSheet(
         context: context,
         elevation: 5,
@@ -123,56 +132,70 @@ class _listarTareasState extends State<listarTareas> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                DropdownButtonFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Materia:',
+                      icon: Icon(Icons.book),
+                    ),
+                    value: idMateriaFK,
+                    items: listaMaterias.map((e){
+                      return DropdownMenuItem(
+                          value: e.IdMateria,
+                          child: Text(e.Nombre));
+                    }).toList(),
+                    onChanged: (data){
+                      setState(() {
+                        idMateriaFK = data!;
+                      });
+                    }),
+                const SizedBox(height: 10,),
                 TextFormField(
-                  controller: nombreController,
+                  controller: fechaDriver,
                   decoration: const InputDecoration(
-                      icon: Icon(Icons.border_color),
-                      labelText: "Nombre"
+                      labelText: 'Fecha de entrega:',
+                      icon: Icon(Icons.date_range)
+                  ),
+                  readOnly: true,
+                  onTap: (){
+                    seleccionarFecha();
+                  },
+                ),
+                const SizedBox(height: 15,),
+                TextFormField(
+                  controller: descripcionDriver,
+                  decoration: const InputDecoration(
+                      labelText: 'Descripción: ',
+                      icon: Icon(Icons.description)
                   ),
                 ),
-                SizedBox(height: 20),
-                TextFormField(
-                  controller: semestreController,
-                  decoration: const InputDecoration(
-                      icon: Icon(Icons.school),
-                      labelText: "Semestre"
-                  ),
-                ),
-                SizedBox(height: 20),
-                TextFormField(
-                  controller: docenteController,
-                  decoration: const InputDecoration(
-                      icon: Icon(Icons.person),
-                      labelText: "Docente"
-                  ),
-                ),
-                SizedBox(height: 20),
+                const SizedBox(height: 10,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(onPressed: (){
-                      Materia m = Materia(
-                          IdMateria: idmateriaController.text,
-                          Nombre: nombreController.text,
-                          Semestre: semestreController.text,
-                          Docente: docenteController.text
-                      );
-
-                      DBMateria.actualizar(m, index).then((value){
-                        if(value < 1){
-                          mensaje("Error al actualizar");
+                    ElevatedButton(
+                        onPressed: (){
+                          Tarea t = Tarea(
+                              IdTarea: -1,
+                              IdMateria: idMateriaFK,
+                              F_Entrega: fechaDriver.text,
+                              Descripcion: descripcionDriver.text);
+                          DBTarea.actualizar(t, index).then((value) {
+                            if (value < 1) {
+                              mensaje('Error al actualizar');
+                              Navigator.pop(context);
+                              return;
+                            }
+                            mensaje('Se actualizo con exito');
+                            cargarDatos();
+                            Navigator.pop(context);
+                          });
+                        },
+                        child: const Icon(Icons.update, size: 25,)),
+                    ElevatedButton(
+                        onPressed: (){
                           Navigator.pop(context);
-                          return;
-                        }
-
-                        mensaje("Se actualizo con exito");
-                        cargarMaterias();
-                        Navigator.pop(context);
-                      });
-                    }, child: Text("Actualizar")),
-                    ElevatedButton(onPressed: (){
-                      Navigator.pop(context);
-                    }, child: Text("Cancelar"))
+                        },
+                        child: const Icon(Icons.cancel, size: 25,)),
                   ],
                 )
               ],
@@ -185,5 +208,20 @@ class _listarTareasState extends State<listarTareas> {
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(s))
     );
+  }
+
+  Future<void> seleccionarFecha() async {
+    DateTime? fechaSelecionada = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      initialDate: DateTime.now(),
+      lastDate: DateTime(2099),
+    );
+
+    if (fechaSelecionada != null){
+      setState(() {
+        fechaDriver.text = fechaSelecionada.toString().split(" ")[0];
+      });
+    }
   }
 }
