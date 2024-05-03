@@ -55,7 +55,8 @@ class DBTarea {
           "MATERIA.NOMBRE",
           "MATERIA.SEMESTRE",
           "MATERIA.DOCENTE"],
-      where:"F_ENTREGA=?", whereArgs: [DateTime.now().toString().split(" ")[0]]
+      where:"F_ENTREGA>=?", whereArgs: [DateTime.now().toString().split(" ")[0]],
+      orderBy: "F_ENTREGA"
     );
 
     return List.generate(

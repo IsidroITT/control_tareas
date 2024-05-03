@@ -1,13 +1,10 @@
 import 'package:control_tareas/controladores/materiaDB.dart';
 import 'package:control_tareas/controladores/tareaDB.dart';
 import 'package:control_tareas/modelos/tarea.dart';
-import 'package:control_tareas/tarea/agregarTarea.dart';
-import 'package:control_tareas/tarea/listarTareas.dart';
-
 import '/tarea/ventanaTareas.dart';
 import '/materia/ventanaMaterias.dart';
+import './modelos/tareaMateria.dart';
 import 'package:flutter/material.dart';
-
 import 'modelos/materia.dart';
 
 void main() {
@@ -20,10 +17,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Control de tareas',
       debugShowCheckedModeBanner: false,
-      home: const MyHomePage(title: 'Control de tareas'),
+      home: MyHomePage(title: 'Control de tareas'),
     );
   }
 }
@@ -44,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
  final fecha = TextEditingController();
  final descripcion = TextEditingController();
  List<Materia> listaMaterias = [];
+ List<TareaMateria> listaTareas = [];
  String materiallaveforanea = "";
 
  @override
@@ -55,8 +53,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void cargarMaterias() async {
    List<Materia> lm = await DBMateria.consultar();
+   List<TareaMateria> lt = await DBTarea.consultarHoy();
    setState(() {
+     listaTareas = lt;
      listaMaterias = lm;
+     if (lm.isNotEmpty) {
+       materiallaveforanea = lm.first.IdMateria;
+     }
    });
   }
 
@@ -64,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Control tareas",
+        title: const Text("Control tareas",
           style: TextStyle(
             color: Colors.white,
             fontSize: 28
@@ -72,30 +75,45 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         centerTitle: true,
         backgroundColor: Colors.deepPurpleAccent,
+        actions: [
+          IconButton(onPressed: (){
+            cargarMaterias();
+          }, icon: const Icon(Icons.refresh)),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           agregarTarea();
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(child: Column()),
+            const DrawerHeader(child: Column()),
             itemDrawer(1, Icons.book, "Materias"),
             itemDrawer(2, Icons.edit, "Tareas"),
           ],
         ),
       ),
+      body: ListView.builder(
+          padding: const EdgeInsets.all(20),
+          itemCount: listaTareas.length,
+          itemBuilder: (context, index){
+            return ListTile(
+              leading: const Icon(Icons.pending_actions, color: Colors.yellow,),
+              title: Text(listaTareas[index].F_Entrega),
+              subtitle: Text('${listaTareas[index].NombreMateria}: ${listaTareas[index].Descripcion}'),
+            );
+          },),
     );
   }
 
   Widget dinamico(){
     switch(_indice){
-      case 1: return ventanaMaterias();
-      case 2: return VentanaTareas();
+      case 1: return const ventanaMaterias();
+      case 2: return const VentanaTareas();
       default: return ListView();
     }
   }
@@ -115,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
       title: Row(
         children: [
           Expanded(child: Icon(icono),),
-          Expanded(child: Text(texto), flex: 2,),
+          Expanded(flex: 2,child: Text(texto)),
         ],
       )
     );
@@ -128,15 +146,15 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (BuildContext context) {
         return Dialog(
           child: ListView(
-            padding: EdgeInsets.all(15),
+            padding: const EdgeInsets.all(15),
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               DropdownButtonFormField(
                   value: materiallaveforanea,
                   items: listaMaterias.map((e){
                     return DropdownMenuItem(
                         value: e.IdMateria,
-                        child: Text("${e.Nombre} - ${e.Docente}")
+                        child: Text(e.Nombre)
                     );
                   }).toList(),
                   onChanged: (valor){
@@ -145,10 +163,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   }
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               TextField(
                 controller: fecha,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Fecha de entrega:",
                   icon: Icon(Icons.date_range)
                 ),
@@ -157,15 +175,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   selecionarFecha();
                 },
               ),
-              SizedBox(height: 15,),
+              const SizedBox(height: 15,),
               TextField(
                 controller: descripcion,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                     labelText: "Descripción:",
                     icon: Icon(Icons.content_paste_sharp)
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -187,10 +205,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       mensaje("Se inserto con exito");
                       Navigator.pop(context);
                     });
-                  }, child: Text("Agregar")),
+                  }, child: const Text("Agregar")),
                   ElevatedButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Text("Cancelar"))
+                  }, child: const Text("Cancelar"))
                 ],
               )
             ],
