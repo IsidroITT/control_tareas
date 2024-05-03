@@ -1,6 +1,5 @@
-import 'package:control_tareas/controladores/materiaDB.dart';
-import 'package:control_tareas/controladores/tareaDB.dart';
-import 'package:control_tareas/modelos/tarea.dart';
+import '/controladores/materiaDB.dart';
+import '/controladores/tareaDB.dart';
 import '/tarea/ventanaTareas.dart';
 import '/materia/ventanaMaterias.dart';
 import './modelos/tareaMateria.dart';
@@ -36,13 +35,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
  int _indice = 0;
-
- // estas variables tampoco :p
- final fecha = TextEditingController();
- final descripcion = TextEditingController();
- List<Materia> listaMaterias = [];
  List<TareaMateria> listaTareas = [];
- String materiallaveforanea = "";
 
  @override
   void initState() {
@@ -52,14 +45,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void cargarMaterias() async {
-   List<Materia> lm = await DBMateria.consultar();
    List<TareaMateria> lt = await DBTarea.consultarHoy();
    setState(() {
      listaTareas = lt;
-     listaMaterias = lm;
-     if (lm.isNotEmpty) {
-       materiallaveforanea = lm.first.IdMateria;
-     }
    });
   }
 
@@ -78,22 +66,51 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(onPressed: (){
             cargarMaterias();
-          }, icon: const Icon(Icons.refresh)),
+          }, icon: const Icon(Icons.refresh,
+            color: Colors.white,
+          )),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          agregarTarea();
-        },
-        child: const Icon(Icons.add),
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(child: Column()),
+            const DrawerHeader(child: Column(
+              children: [
+                CircleAvatar(
+                  child: Icon(Icons.account_box, size: 40,),
+                  radius: 40,
+                ),
+                SizedBox(height: 8,),
+                Text("ADEL",
+                  style: TextStyle(
+                    color: Colors.white
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.copyright,
+                    size: 20,
+                    color: Colors.white,
+                    ),
+                    SizedBox(width: 5,),
+                    Text("Moviles 2024",
+                      style: TextStyle(
+                        color: Colors.white
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+              decoration: BoxDecoration(
+                color: Colors.pinkAccent
+              ),
+            ),
             itemDrawer(1, Icons.book, "Materias"),
             itemDrawer(2, Icons.edit, "Tareas"),
+
           ],
         ),
       ),
@@ -114,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
     switch(_indice){
       case 1: return const ventanaMaterias();
       case 2: return const VentanaTareas();
-      default: return ListView();
+      default: return const VentanaTareas();
     }
   }
 
@@ -137,99 +154,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       )
     );
-  }
-
-  // Los metodos de abajo no deberian estar aqui :c
-  void agregarTarea(){
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: ListView(
-            padding: const EdgeInsets.all(15),
-            children: [
-              const SizedBox(height: 20),
-              DropdownButtonFormField(
-                  value: materiallaveforanea,
-                  items: listaMaterias.map((e){
-                    return DropdownMenuItem(
-                        value: e.IdMateria,
-                        child: Text(e.Nombre)
-                    );
-                  }).toList(),
-                  onChanged: (valor){
-                    setState(() {
-                      materiallaveforanea = valor!;
-                    });
-                  }
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                controller: fecha,
-                decoration: const InputDecoration(
-                  labelText: "Fecha de entrega:",
-                  icon: Icon(Icons.date_range)
-                ),
-                readOnly: true,
-                onTap: (){
-                  selecionarFecha();
-                },
-              ),
-              const SizedBox(height: 15,),
-              TextField(
-                controller: descripcion,
-                decoration: const InputDecoration(
-                    labelText: "Descripción:",
-                    icon: Icon(Icons.content_paste_sharp)
-                ),
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(onPressed: (){
-                    Tarea t = Tarea(
-                        IdTarea: -1,
-                        IdMateria: materiallaveforanea,
-                        F_Entrega: fecha.text,
-                        Descripcion: descripcion.text
-                    );
-
-                    DBTarea.insertar(t).then((value){
-                      if(value < 1){
-                        mensaje("Error al insertar");
-                        Navigator.pop(context);
-                        return;
-                      }
-
-                      mensaje("Se inserto con exito");
-                      Navigator.pop(context);
-                    });
-                  }, child: const Text("Agregar")),
-                  ElevatedButton(onPressed: (){
-                    Navigator.pop(context);
-                  }, child: const Text("Cancelar"))
-                ],
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> selecionarFecha() async{
-   DateTime? fechaSelecionada = await showDatePicker(
-       context: context,
-       firstDate: DateTime.now(),
-       lastDate: DateTime(3000)
-   );
-
-   if (fechaSelecionada != null){
-     setState(() {
-       fecha.text = fechaSelecionada.toString().split(" ")[0];
-     });
-   }
   }
 
   void mensaje(String s){

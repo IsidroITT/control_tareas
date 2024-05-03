@@ -4,7 +4,7 @@ import 'package:path/path.dart';
 class Conexion{
   static Future<Database> abrirDB() async{
     return openDatabase(
-      join(await getDatabasesPath(), "practica.db"),
+      join(await getDatabasesPath(), "practica1.db"),
       onCreate: (db, version){
         return _script(db);
       },
