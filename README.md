@@ -19,6 +19,7 @@ git clone https://github.com/IsidroITT/control_tareas.git
 rm lib/main.dart
 rmdir lib
 mv control_tareas lib
+flutter pub add sqflite
 ```
 
 2. Disfrutar c: (#NoNosRepruebesBenigno)
