@@ -1,10 +1,8 @@
-import '/controladores/materiaDB.dart';
 import '/controladores/tareaDB.dart';
 import '/tarea/ventanaTareas.dart';
 import '/materia/ventanaMaterias.dart';
 import './modelos/tareaMateria.dart';
 import 'package:flutter/material.dart';
-import 'modelos/materia.dart';
 
 void main() {
   runApp(const MyApp());

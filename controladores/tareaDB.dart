@@ -1,6 +1,5 @@
-import 'package:control_tareas/modelos/tarea.dart';
-import 'package:control_tareas/modelos/tareaMateria.dart';
-
+import '/modelos/tarea.dart';
+import '/modelos/tareaMateria.dart';
 import '/controladores/conexionDB.dart';
 import 'package:sqflite/sqflite.dart';
 

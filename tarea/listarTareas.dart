@@ -1,4 +1,4 @@
-import 'package:control_tareas/controladores/materiaDB.dart';
+import '/controladores/materiaDB.dart';
 import 'package:flutter/material.dart';
 import '../modelos/materia.dart';
 import '../modelos/tareaMateria.dart';
